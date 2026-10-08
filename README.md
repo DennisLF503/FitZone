@@ -14,8 +14,8 @@ Sitio web de ejercicios en gym y en casa, con un entrenador IA (Gemini).
 Abre `index.html` en el navegador. Para GitHub Pages: Settings → Pages → Deploy from branch → `main` / root.
 
 ## Entrenador IA
-El usuario pega su API key de Gemini (https://aistudio.google.com/apikey). Se guarda solo en su navegador.
-Si el modelo da error, cambia la constante `MODEL` en `app.js`.
+esta basado en Gemini 3.1 flash lite, por el momento lo que hace es hacer una lista de ejercicios con descripcion proximamente se añadiran imagenes y extras
+
 
 ## Imágenes
 Guarda las imágenes de ejercicios en la carpeta `img/`.
