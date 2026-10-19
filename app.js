@@ -69,10 +69,12 @@ const PAGES=[["index.html","Inicio"],["ejercicios.html","Ejercicios"],["gym.html
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const cur=location.pathname.split("/").pop()||"index.html";
-document.body.insertAdjacentHTML("afterbegin",`<nav class="nav"><b>FitZone</b>${PAGES.map(p=>`<a href="${p[0]}" ${p[0]===cur?'class="on"':""}>${p[1]}</a>`).join("")}</nav>`);
+document.body.insertAdjacentHTML("afterbegin",`<nav class="nav"><a class="logo" href="index.html"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="13" cy="13" r="3.5" fill="#2438E8"/></svg>FitZone</a><div class="links">${PAGES.slice(1).map(p=>`<a href="${p[0]}" ${p[0]===cur?'class="on"':""}>${p[1]}</a>`).join("")}</div></nav>`);
 const IG_USER="df_lf503._",FRASE="Cada repetición te acerca a la mejor versión de ti.";
-document.body.insertAdjacentHTML("beforeend",`<footer><p class="quote">${FRASE}</p><p><a href="https://www.instagram.com/${IG_USER}" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Síguenos en Instagram @${IG_USER}</a></p><p>FitZone · Consulta a un profesional de la salud antes de iniciar una rutina nueva.</p></footer>`);
-const card=e=>`<article class="tile b ex" data-id="${e.id}" tabindex="0" role="button" aria-label="Ver detalles de ${esc(e.n)}">${e.i?`<img src="${e.i}" alt="${esc(e.n)}" loading="lazy" width="720" height="720">`:`<div class="ph">Imagen próximamente</div>`}<div class="in"><h4>${esc(e.n)}</h4><p>${esc(e.t)}</p><div class="meta"><span class="pill">${e.c}</span><span class="pill">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.l}</span><span class="pill">${esc(e.q)}</span><span class="pill hl">${e.s}</span></div></div></article>`;
+document.body.insertAdjacentHTML("beforeend",`<footer><div class="wrap"><p class="quote">${FRASE}</p><p><a href="https://www.instagram.com/${IG_USER}" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Síguenos en Instagram @${IG_USER}</a></p><p class="fine">Consulta a un profesional de la salud antes de iniciar una rutina nueva.</p></div></footer>`);
+const LV=["Principiante","Intermedio","Avanzado"];
+const splitSR=s=>{const k=s.indexOf(" por ");return k<0?[s,""]:[s.slice(0,k),s.slice(k+1)]};
+const card=e=>`<article class="tile b ex" data-id="${e.id}" tabindex="0" role="button" aria-label="Ver detalles de ${esc(e.n)}">${e.i?`<img src="${e.i}" alt="${esc(e.n)}" loading="lazy" width="720" height="720">`:`<div class="ph">Imagen próximamente</div>`}<div class="in"><h4>${esc(e.n)}</h4><p>${esc(e.t)}</p><div class="foot"><div class="lv" role="img" aria-label="Nivel ${e.l}">${[0,1,2].map(k=>`<i${k<=LV.indexOf(e.l)?' class="on"':""}></i>`).join("")}<span>${e.l}</span></div><span class="sr" aria-label="${esc(e.s.replace("×"," series de "))}">${splitSR(e.s)[0]}${splitSR(e.s)[1]?`<small>${splitSR(e.s)[1]}</small>`:""}</span></div><div class="meta"><span class="pill ${e.p}">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.c}</span><span class="pill">${esc(e.q)}</span></div></div></article>`;
 function list(base){
   let cat="Todos";const g=$("#grid"),ch=$("#chips");
   const draw=()=>{const r=EX.filter(e=>(!base||e.p===base)&&(cat==="Todos"||e.c===cat));g.innerHTML=r.map(card).join("")||'<p class="empty">No hay ejercicios en esta categoría.</p>'};
@@ -112,7 +114,7 @@ function openEx(id){
   img.src=e.i;img.alt=e.n;
   const eq=e.q.toLowerCase()==="sin equipo"?"tu peso corporal":e.q.toLowerCase();
   const rest=e.c==="Cardio"?"30–45 s":REST[e.l];
-  $("#mtx").innerHTML=`<h2 id="mt">${esc(e.n)}</h2><div class="meta" style="margin:0 0 4px"><span class="pill">${e.c}</span><span class="pill">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.l}</span><span class="pill hl">${e.s}</span></div>
+  $("#mtx").innerHTML=`<h2 id="mt">${esc(e.n)}</h2><div class="meta" style="margin:0 0 4px"><span class="pill ${e.p}">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.c}</span><span class="pill">${e.l}</span><span class="pill hl">${e.s}</span></div>
   <h4>Descripción</h4><p>${CD[e.c][0]} ${e.p==="gym"?"Se hace en el gym":"Se puede hacer en casa"} con ${esc(eq)}. Nivel ${e.l.toLowerCase()}.</p>
   <h4>Cómo hacerla</h4><ul><li>${esc(e.t)}</li><li>Haz ${e.s}.</li><li>Descansa ${rest} entre series.</li><li>Evita ${CD[e.c][1]}.</li></ul>
   <h4>Combínala con</h4><div class="chips" style="margin:0">${pairs(e).map(x=>`<button class="chip" data-go="${x.id}">${esc(x.n)}</button>`).join("")}</div>`;
@@ -137,6 +139,44 @@ function md(t){
   h=h.replace(/(^[-*] .*(\n|$))+/gm,m=>"<ul>"+m.trim().split("\n").map(l=>"<li>"+l.replace(/^[-*] /,"")+"</li>").join("")+"</ul>");
   return h.split(/\n{2,}/).map(b=>/^<(h3|h4|ul)/.test(b.trim())?b:"<p>"+b.replace(/\n/g,"<br>")+"</p>").join("");
 }
+/* ===== Rutina con los ejercicios del sitio ===== */
+function routinePool(d){
+  const place=/^gym/i.test(d.lugar)?"gym":"casa";
+  const z=d.zona==="Piernas y glúteos"?"Piernas":d.zona;
+  const all=EX.filter(e=>e.p===place);
+  if(z==="Cuerpo completo")return all;
+  let pool=all.filter(e=>e.c===z);
+  if(pool.length<5)(SYN[z]||[]).forEach(c=>{pool=pool.concat(all.filter(e=>e.c===c))});
+  if(pool.length<5)pool=pool.concat(all.filter(e=>!pool.includes(e)));
+  return pool;
+}
+function parsePlan(txt,pool){
+  const t=txt.trim().replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"");
+  let o;
+  try{o=JSON.parse(t)}catch{
+    const a=t.indexOf("{"),b=t.lastIndexOf("}");
+    try{o=JSON.parse(t.slice(a,b+1))}catch{throw new Error("No se pudo leer la respuesta de la IA. Intenta de nuevo.")}
+  }
+  const ids=new Set(pool.map(e=>e.id)),seen=new Set(),items=[];
+  (Array.isArray(o.ejercicios)?o.ejercicios:[]).forEach(x=>{
+    const id=Number(x&&x.id);if(!ids.has(id)||seen.has(id))return;seen.add(id);
+    const e=EX[id],df=e.s.split("×"),n=Math.round(Number(x.series)),
+      series=n>=1&&n<=8?n:(+df[0]||3),
+      reps=String(x.repeticiones??"").trim().slice(0,30)||df.slice(1).join("×")||"10";
+    items.push({e,series,reps,descanso:String(x.descanso||"").trim().slice(0,30),consejo:String(x.consejo||"").trim().slice(0,200)});
+  });
+  if(!items.length)throw new Error("La IA no eligió ejercicios de la lista. Intenta de nuevo.");
+  const arr=v=>(Array.isArray(v)?v:[]).map(x=>String(x).trim()).filter(Boolean).slice(0,6);
+  return{items,resumen:String(o.resumen||""),frecuencia:String(o.frecuencia||""),calentamiento:arr(o.calentamiento),enfriamiento:arr(o.enfriamiento),advertencia:String(o.advertencia||"")};
+}
+function repText(series,reps){
+  const m=reps.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*(por .*)?$/i),w=series===1?"serie":"series";
+  return m?`${series} ${w} de ${m[1]} repeticiones${m[2]?" "+m[2]:""}`:`${series} ${w} de ${reps}`;
+}
+const rcard=(it,n)=>{
+  const e=it.e,s=`${it.series}×${it.reps}`,[m1,m2]=splitSR(s);
+  return `<article class="tile ex" data-id="${e.id}" tabindex="0" role="button" aria-label="Ver detalles de ${esc(e.n)}"><span class="ord" aria-hidden="true">${n}</span>${e.i?`<img src="${e.i}" alt="${esc(e.n)}" loading="lazy" width="720" height="720">`:`<div class="ph">Imagen próximamente</div>`}<div class="in"><h4>${esc(e.n)}</h4><p class="how">${esc(repText(it.series,it.reps))}</p>${it.consejo?`<p class="tip">${esc(it.consejo)}</p>`:""}<div class="foot"><span class="rest">${it.descanso?"Descanso "+esc(it.descanso):""}</span><span class="sr" aria-label="${esc(s.replace("×"," series de "))}">${esc(m1)}${m2?`<small>${esc(m2)}</small>`:""}</span></div></div></article>`;
+};
 function ai(){
   const d={};let i=0;
   const S=[
@@ -172,20 +212,36 @@ function ai(){
   async function run(){
     const k=GEMINI_KEY||$("#key").value.trim();if(!k){$("#err").textContent="Pega tu API key para continuar.";return}
     if(!GEMINI_KEY)localStorage.setItem("gk",k);const b=$("#go");b.disabled=true;b.textContent="Creando rutina…";$("#err").textContent="";
+    const showPlan=p=>{
+      const ul=a=>`<ul class="rlist">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+      box.classList.add("wide");
+      box.innerHTML=`<div class="rhead"><h2>Tu rutina</h2>${p.resumen?`<p class="lead">${esc(p.resumen)}</p>`:""}${p.frecuencia?`<div class="meta"><span class="pill hl">${esc(p.frecuencia)}</span></div>`:""}</div>${p.calentamiento.length?`<h3 class="rs">Calentamiento</h3>${ul(p.calentamiento)}`:""}<h3 class="rs">Ejercicios</h3><div class="grid rg">${p.items.map((it,k)=>rcard(it,k+1)).join("")}</div>${p.enfriamiento.length?`<h3 class="rs">Enfriamiento</h3>${ul(p.enfriamiento)}`:""}${p.advertencia?`<p class="note">${esc(p.advertencia)}</p>`:""}<div class="row rrow"><button class="btn o" id="again">Nueva rutina</button><button class="btn" id="print">Imprimir</button></div>`;
+      $("#again").onclick=()=>{box.classList.remove("wide");i=0;step()};$("#print").onclick=()=>print();
+      box.scrollIntoView({behavior:"smooth",block:"start"});
+    };
     const imc=(d.peso/((d.altura/100)**2)).toFixed(1);
-    const prompt=`Eres un entrenador personal certificado. Crea una rutina en español para esta persona:
+    const pool=routinePool(d);
+    const lista=pool.map(e=>`${e.id}|${e.n}|${e.c}|${e.q}|${e.l}|${e.s}`).join("\n");
+    const prompt=`Eres un entrenador personal certificado. Arma una rutina en español para esta persona:
 - Edad: ${d.edad} años
 - Peso: ${d.peso} kg
 - Altura: ${d.altura} cm (IMC aprox. ${imc})
 - Lugar y equipo: ${d.lugar}
 - Zona a entrenar: ${d.zona}
-Incluye: 1) un resumen breve de enfoque, 2) calentamiento, 3) entre 5 y 7 ejercicios con series, repeticiones, descanso y un consejo de técnica cada uno, 4) enfriamiento, 5) frecuencia semanal sugerida. Usa solo ejercicios posibles con el equipo indicado. Usa títulos con ## y listas con -. Cierra con una advertencia corta de consultar a un profesional si hay lesiones o condiciones médicas.`;
+
+Debes usar SOLO ejercicios de esta lista (formato: id|nombre|categoría|equipo|nivel|series sugeridas). No inventes ejercicios ni ids:
+${lista}
+
+Elige entre 5 y 7 ejercicios (todos los de la lista si hay menos). Prioriza la zona pedida y, si hay pocos, completa con los más cercanos. Ordénalos como se harían en la sesión. Ajusta series y repeticiones a la edad, el peso y la estatura de la persona y al nivel de cada ejercicio.
+
+Responde SOLO con JSON válido, sin texto extra ni bloques de código, con esta forma exacta:
+{"resumen":"2 frases sobre el enfoque","frecuencia":"ej. 3 días por semana","calentamiento":["3 a 4 pasos cortos"],"ejercicios":[{"id":0,"series":4,"repeticiones":"10","descanso":"60 s","consejo":"una frase corta de técnica"}],"enfriamiento":["2 a 3 pasos cortos"],"advertencia":"una frase corta sobre consultar a un profesional si hay lesiones o condiciones médicas"}
+Las repeticiones son un texto corto: "10", "8-10", "12 por lado" o "30 s".`;
     try{
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:"application/json"}})});
       const j=await r.json();if(!r.ok)throw new Error(j.error?.message||"Error "+r.status);
       const txt=j.candidates?.[0]?.content?.parts?.map(p=>p.text).join("")||"";if(!txt)throw new Error("La respuesta llegó vacía. Intenta de nuevo.");
-      box.innerHTML=`<h2>Tu rutina</h2><div class="out">${md(txt)}</div><div class="row"><button class="btn o" id="again">Nueva rutina</button><button class="btn" id="print">Imprimir</button></div>`;
-      $("#again").onclick=()=>{i=0;step()};$("#print").onclick=()=>print();
+      showPlan(parsePlan(txt,pool));
     }catch(e){b.disabled=false;b.textContent="Crear mi rutina";$("#err").textContent="No se pudo generar la rutina: "+e.message}
   }
   step();
