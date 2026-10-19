@@ -1,6 +1,27 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inicio · FitZone</title><link rel="stylesheet" href="styles.css"></head><body data-page="index">
-<header class="hero"><h2>FitZone</h2><h1>Entrena donde estés.</h1><p>Más de 60 ejercicios con series y técnica, en el gym o en casa. Y una IA que arma tu rutina.</p><a class="btn" href="entrenador-ia.html">Crear mi rutina</a><a class="btn o" href="ejercicios.html">Ver ejercicios</a></header>
-<div class="wrap"><div class="feat"><a class="tile b ex" href="gym.html" style="color:inherit"><img src="img/press-de-banca.gif" alt="Press de banca" width="720" height="720"><div class="in"><h3>Gym</h3><p>Barras, poleas y máquinas para ganar fuerza.</p></div></a><a class="tile b ex" href="casa.html" style="color:inherit"><img src="img/flexiones-declinadas.gif" alt="Flexiones declinadas" width="720" height="720"><div class="in"><h3>En casa</h3><p>Sin equipo. Solo tu peso corporal.</p></div></a></div>
-<div class="feat s" style="padding-bottom:90px"><div class="tile"><span class="stat" id="n1"></span><p>ejercicios</p></div><div class="tile"><span class="stat" id="n2"></span><p>categorías</p></div><a class="tile" href="buscar.html" style="color:inherit"><h4>Buscador</h4><p>Encuentra por nombre, zona o equipo.</p></a></div></div>
-<script>document.addEventListener("DOMContentLoaded",()=>{});</script>
-<script src="app.js"></script><script>n1.textContent=EX.length;n2.textContent=CATS.length</script></body></html>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inicio · FitZone</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600&display=swap"><link rel="stylesheet" href="styles.css"></head><body data-page="index">
+<header class="hero">
+<div><h1>Entrena donde estés.</h1><p>Más de 60 ejercicios con series y técnica, en el gym o en casa. Y una IA que arma tu rutina.</p><div class="cta"><a class="btn" href="entrenador-ia.html">Crear mi rutina</a><a class="btn o" href="ejercicios.html">Ver ejercicios</a></div></div>
+<figure class="hm"><div class="sw" role="group" aria-label="Lugar de entrenamiento"><button type="button" data-p="gym" aria-pressed="true">Gym</button><button type="button" data-p="casa" aria-pressed="false">En casa</button></div><button type="button" class="hi" id="hb" aria-label="Ver detalles del ejercicio"><img id="hp" src="img/press-de-banca.gif" alt="Press de banca" width="720" height="720"></button><figcaption class="hc"><div><strong id="hn">Press de banca</strong><small id="hd">Barra y banco. Nivel intermedio.</small></div><span class="sr" id="hs">4×8</span></figcaption></figure>
+</header>
+<main class="wrap"><div class="dir">
+<a class="dr" href="gym.html"><h3>Gym</h3><span class="ct" id="cg"></span><p>Barras, poleas y máquinas para ganar fuerza.</p></a>
+<a class="dr" href="casa.html"><h3>En casa</h3><span class="ct" id="cc"></span><p>Sin equipo. Solo tu peso corporal.</p></a>
+<a class="dr" href="buscar.html"><h3>Buscador</h3><span class="ct" id="ck"></span><p>Encuentra por nombre, zona o equipo.</p></a>
+</div></main>
+<script src="app.js"></script>
+<script>
+$("#cg").textContent=EX.filter(e=>e.p==="gym").length+" ejercicios";
+$("#cc").textContent=EX.filter(e=>e.p==="casa").length+" ejercicios";
+$("#ck").textContent=EX.length+" ejercicios en "+CATS.length+" categorías";
+const HF={gym:0,casa:5};let place="gym";
+function heroShow(p){
+  const e=EX[HF[p]],im=$("#hp");place=p;
+  im.style.opacity=0;im.onload=()=>{im.style.opacity=1};
+  im.src=e.i;im.alt=e.n;
+  $("#hn").textContent=e.n;$("#hs").textContent=e.s;
+  $("#hd").textContent=e.q+". Nivel "+e.l.toLowerCase()+".";
+  document.querySelectorAll(".sw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===p)));
+}
+document.querySelectorAll(".sw button").forEach(b=>b.onclick=()=>{if(b.dataset.p!==place)heroShow(b.dataset.p)});
+$("#hb").onclick=()=>openEx(HF[place]);
+</script></body></html>
