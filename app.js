@@ -69,15 +69,30 @@ const PAGES=[["index.html","Inicio"],["ejercicios.html","Ejercicios"],["gym.html
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const cur=location.pathname.split("/").pop()||"index.html";
-document.body.insertAdjacentHTML("afterbegin",`<nav class="nav"><a class="logo" href="index.html"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="13" cy="13" r="3.5" fill="#2438E8"/></svg>FitZone</a><div class="links">${PAGES.slice(1).map(p=>`<a href="${p[0]}" ${p[0]===cur?'class="on"':""}>${p[1]}</a>`).join("")}</div></nav>`);
+document.body.insertAdjacentHTML("afterbegin",`<div class="prog" id="prog" aria-hidden="true"></div><nav class="nav" id="nav"><a class="logo" href="index.html"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="13" cy="13" r="3.5" fill="#2438E8"/></svg>FitZone</a><div class="links">${PAGES.slice(1).map(p=>`<a href="${p[0]}" ${p[0]===cur?'class="on"':""}>${p[1]}</a>`).join("")}</div><button type="button" class="theme" id="theme" aria-label="Cambiar a tema claro" title="Cambiar tema"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg></button></nav>`);
+/* ===== Tema claro / oscuro ===== */
+const THEME_K="fz-theme";
+const applyTheme=t=>{document.documentElement.dataset.theme=t;
+  const b=$("#theme");if(b)b.setAttribute("aria-label",t==="light"?"Cambiar a tema oscuro":"Cambiar a tema claro");
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="light"?"#F5F6F8":"#07090B";};
+applyTheme(localStorage.getItem(THEME_K)||(matchMedia("(prefers-color-scheme:light)").matches?"light":"dark"));
+$("#theme").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";localStorage.setItem(THEME_K,t);applyTheme(t)};
+/* ===== Barra de progreso y sombra de la navegación ===== */
+addEventListener("scroll",()=>{
+  const h=document.documentElement.scrollHeight-innerHeight,p=h>0?scrollY/h*100:0;
+  $("#prog").style.width=p+"%";
+  $("#nav").classList.toggle("solid",scrollY>8);
+},{passive:true});
 const IG_USER="df_lf503._",FRASE="Cada repetición te acerca a la mejor versión de ti.";
 document.body.insertAdjacentHTML("beforeend",`<footer><div class="wrap"><p class="quote">${FRASE}</p><p><a href="https://www.instagram.com/${IG_USER}" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Síguenos en Instagram @${IG_USER}</a></p><p class="fine">Consulta a un profesional de la salud antes de iniciar una rutina nueva.</p></div></footer>`);
 const LV=["Principiante","Intermedio","Avanzado"];
 const splitSR=s=>{const k=s.indexOf(" por ");return k<0?[s,""]:[s.slice(0,k),s.slice(k+1)]};
 const card=e=>`<article class="tile b ex" data-id="${e.id}" tabindex="0" role="button" aria-label="Ver detalles de ${esc(e.n)}">${e.i?`<img src="${e.i}" alt="${esc(e.n)}" loading="lazy" width="720" height="720">`:`<div class="ph">Imagen próximamente</div>`}<div class="in"><h4>${esc(e.n)}</h4><p>${esc(e.t)}</p><div class="foot"><div class="lv" role="img" aria-label="Nivel ${e.l}">${[0,1,2].map(k=>`<i${k<=LV.indexOf(e.l)?' class="on"':""}></i>`).join("")}<span>${e.l}</span></div><span class="sr" aria-label="${esc(e.s.replace("×"," series de "))}">${splitSR(e.s)[0]}${splitSR(e.s)[1]?`<small>${splitSR(e.s)[1]}</small>`:""}</span></div><div class="meta"><span class="pill ${e.p}">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.c}</span><span class="pill">${esc(e.q)}</span></div></div></article>`;
 function list(base){
-  let cat="Todos";const g=$("#grid"),ch=$("#chips");
-  const draw=()=>{const r=EX.filter(e=>(!base||e.p===base)&&(cat==="Todos"||e.c===cat));g.innerHTML=r.map(card).join("")||'<p class="empty">No hay ejercicios en esta categoría.</p>'};
+  let cat="Todos";const g=$("#grid"),ch=$("#chips"),cnt=$("#count");
+  const draw=()=>{const r=EX.filter(e=>(!base||e.p===base)&&(cat==="Todos"||e.c===cat));
+    if(cnt)cnt.textContent=`${r.length} ejercicio${r.length===1?"":"s"}${cat==="Todos"?"":" en "+cat}`;
+    g.innerHTML=r.map(card).join("")||'<p class="empty">No hay ejercicios en esta categoría.</p>';VIEW=r.map(e=>e.id);stagger(g)};
   ch.innerHTML=["Todos",...CATS].map(c=>`<button class="chip ${c===cat?"on":""}">${c}</button>`).join("");
   ch.onclick=ev=>{if(ev.target.matches(".chip")){cat=ev.target.textContent;[...ch.children].forEach(b=>b.classList.toggle("on",b===ev.target));draw()}};
   draw();
@@ -88,7 +103,7 @@ function search(){
   const draw=()=>{const t=norm(q.value.trim());
     const r=EX.filter(e=>(cat==="Todos"||e.c===cat)&&norm([e.n,e.c,e.q,e.l,e.p==="gym"?"gym":"casa"].join(" ")).includes(t));
     $("#count").textContent=`${r.length} resultado${r.length===1?"":"s"}`;
-    g.innerHTML=r.map(card).join("")||'<p class="empty">Sin resultados. Prueba con una categoría como "piernas" o un equipo como "mancuernas".</p>'};
+    g.innerHTML=r.map(card).join("")||'<p class="empty">Sin resultados. Prueba con una categoría como "piernas" o un equipo como "mancuernas".</p>';VIEW=r.map(e=>e.id);stagger(g)};
   ch.innerHTML=["Todos",...CATS].map(c=>`<button class="chip ${c===cat?"on":""}">${c}</button>`).join("");
   ch.onclick=ev=>{if(ev.target.matches(".chip")){cat=ev.target.textContent;[...ch.children].forEach(b=>b.classList.toggle("on",b===ev.target));draw()}};
   q.oninput=draw;draw();
@@ -108,31 +123,53 @@ function pairs(e){const pool=EX.filter(x=>x.p===e.p&&x.id!==e.id),out=[],same=po
   if(same.length)out.push(same[e.id%same.length]);
   SYN[e.c].forEach((c,k)=>{const l=pool.filter(x=>x.c===c);if(l.length)out.push(l[(e.id+k)%l.length])});return out}
 document.body.insertAdjacentHTML("beforeend",`<div class="modal" id="modal" aria-hidden="true"><div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mt"><button class="mx" aria-label="Cerrar">×</button><div class="mimg"><img id="mi" alt=""></div><div class="mtxt" id="mtx"></div></div></div>`);
-let lastFocus=null;
+let lastFocus=null,VIEW=EX.map(e=>e.id),curId=null;
+function step(dir){
+  if(VIEW.length<2)return;
+  const k=VIEW.indexOf(curId);
+  openEx(VIEW[(k<0?0:k+dir+VIEW.length)%VIEW.length]);
+}
 function openEx(id){
-  const e=EX[id];if(!e)return;const m=$("#modal"),img=$("#mi");
-  img.src=e.i;img.alt=e.n;
+  const e=EX[id];if(!e)return;const m=$("#modal"),img=$("#mi");curId=id;
+  img.classList.remove("ready");img.onload=()=>img.classList.add("ready");
+  img.src=e.i;img.alt=e.n;if(img.complete&&img.naturalWidth)img.classList.add("ready");
   const eq=e.q.toLowerCase()==="sin equipo"?"tu peso corporal":e.q.toLowerCase();
   const rest=e.c==="Cardio"?"30–45 s":REST[e.l];
   $("#mtx").innerHTML=`<h2 id="mt">${esc(e.n)}</h2><div class="meta" style="margin:0 0 4px"><span class="pill ${e.p}">${e.p==="gym"?"Gym":"Casa"}</span><span class="pill">${e.c}</span><span class="pill">${e.l}</span><span class="pill hl">${e.s}</span></div>
   <h4>Descripción</h4><p>${CD[e.c][0]} ${e.p==="gym"?"Se hace en el gym":"Se puede hacer en casa"} con ${esc(eq)}. Nivel ${e.l.toLowerCase()}.</p>
   <h4>Cómo hacerla</h4><ul><li>${esc(e.t)}</li><li>Haz ${e.s}.</li><li>Descansa ${rest} entre series.</li><li>Evita ${CD[e.c][1]}.</li></ul>
-  <h4>Combínala con</h4><div class="chips" style="margin:0">${pairs(e).map(x=>`<button class="chip" data-go="${x.id}">${esc(x.n)}</button>`).join("")}</div>`;
+  <h4>Combínala con</h4><div class="chips" style="margin:0">${pairs(e).map(x=>`<button class="chip" data-go="${x.id}">${esc(x.n)}</button>`).join("")}</div>
+  ${VIEW.length>1?`<div class="mnav"><button class="btn o" data-nav="-1">← Anterior</button><span class="mpos">${VIEW.indexOf(id)+1} de ${VIEW.length}</span><button class="btn o" data-nav="1">Siguiente →</button></div>`:""}`;
   if(!m.classList.contains("on")){lastFocus=document.activeElement;document.body.style.overflow="hidden"}
   m.classList.add("on");m.setAttribute("aria-hidden","false");$("#mtx").scrollTop=0;$(".mx").focus();
 }
 function closeEx(){const m=$("#modal");m.classList.remove("on");m.setAttribute("aria-hidden","true");document.body.style.overflow="";lastFocus&&lastFocus.focus()}
 document.addEventListener("click",ev=>{
   const g=ev.target.closest("[data-go]");if(g)return openEx(+g.dataset.go);
+  const nv=ev.target.closest("[data-nav]");if(nv)return step(+nv.dataset.nav);
   if(ev.target.closest(".mx")||ev.target.id==="modal")return closeEx();
   const c=ev.target.closest(".tile.ex[data-id]");if(c)openEx(+c.dataset.id);
 });
 document.addEventListener("keydown",ev=>{
-  if(ev.key==="Escape"&&$("#modal").classList.contains("on"))closeEx();
+  const on=$("#modal").classList.contains("on");
+  if(on&&ev.key==="Escape")return closeEx();
+  if(on&&ev.key==="ArrowRight"){ev.preventDefault();step(1)}
+  if(on&&ev.key==="ArrowLeft"){ev.preventDefault();step(-1)}
   if((ev.key==="Enter"||ev.key===" ")&&ev.target.matches&&ev.target.matches(".tile.ex[data-id]")){ev.preventDefault();openEx(+ev.target.dataset.id)}
 });
+/* ===== Aparición al desplazar ===== */
+const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
+const IO=!RM&&"IntersectionObserver"in window?new IntersectionObserver((es,o)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");o.unobserve(e.target)}})
+},{rootMargin:"0px 0px -6% 0px",threshold:.05}):null;
+function scan(){if(IO)document.querySelectorAll(".reveal:not(.in)").forEach(e=>IO.observe(e))}
+function stagger(box){if(!IO)return;[...box.children].forEach((e,i)=>{
+  if(e.dataset.rv)return;e.dataset.rv="1";e.classList.add("reveal");e.style.setProperty("--d",Math.min(i,10)*45+"ms")});scan()}
+
 /* ===== Entrenador IA (Gemini) ===== */
-const GEMINI_KEY="AQ.Ab8RN6JpYcKwmsjmhZBNYNmuESgBPsQq6sj6aGXbUi3X7ygkTg"; // Si la dejas vacía, la página pedirá la clave al usuario
+/* La clave NO va en el código: cualquier visitante podría leerla y gastar la cuota.
+   Déjala vacía para que la página la pida; se guarda solo en el navegador de quien la usa. */
+const GEMINI_KEY="";
 const MODEL="gemini-3.1-flash-lite"; // Cambia aquí el ID si Google lo publica con otro nombre
 function md(t){
   let h=esc(t).replace(/^### (.*)$/gm,"<h4>$1</h4>").replace(/^#{1,2} (.*)$/gm,"<h3>$1</h3>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
@@ -216,6 +253,7 @@ function ai(){
       const ul=a=>`<ul class="rlist">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
       box.classList.add("wide");
       box.innerHTML=`<div class="rhead"><h2>Tu rutina</h2>${p.resumen?`<p class="lead">${esc(p.resumen)}</p>`:""}${p.frecuencia?`<div class="meta"><span class="pill hl">${esc(p.frecuencia)}</span></div>`:""}</div>${p.calentamiento.length?`<h3 class="rs">Calentamiento</h3>${ul(p.calentamiento)}`:""}<h3 class="rs">Ejercicios</h3><div class="grid rg">${p.items.map((it,k)=>rcard(it,k+1)).join("")}</div>${p.enfriamiento.length?`<h3 class="rs">Enfriamiento</h3>${ul(p.enfriamiento)}`:""}${p.advertencia?`<p class="note">${esc(p.advertencia)}</p>`:""}<div class="row rrow"><button class="btn o" id="again">Nueva rutina</button><button class="btn" id="print">Imprimir</button></div>`;
+      VIEW=p.items.map(it=>it.e.id);const rg=box.querySelector(".grid.rg");if(rg)stagger(rg);
       $("#again").onclick=()=>{box.classList.remove("wide");i=0;step()};$("#print").onclick=()=>print();
       box.scrollIntoView({behavior:"smooth",block:"start"});
     };
@@ -246,5 +284,41 @@ Las repeticiones son un texto corto: "10", "8-10", "12 por lado" o "30 s".`;
   }
   step();
 }
+/* ===== Página de inicio ===== */
+function indexPage(){
+  const set=(id,t)=>{const el=$(id);if(el)el.textContent=t};
+  set("#cg",EX.filter(e=>e.p==="gym").length+" ejercicios");
+  set("#cc",EX.filter(e=>e.p==="casa").length+" ejercicios");
+  set("#ck",EX.length+" ejercicios en "+CATS.length+" categorías");
+  /* Ejercicio destacado */
+  const HF={gym:0,casa:5};let place="gym";
+  const sw=document.querySelector(".sw"),im=$("#hp"),badge=$("#hbcat");
+  function heroShow(p){
+    const e=EX[HF[p]];place=p;if(sw)sw.dataset.p=p;
+    const same=im&&im.getAttribute("src")===e.i;
+    if(im&&!same)im.style.opacity=0;
+    if(im){im.onload=()=>{im.style.opacity=1};im.src=e.i;im.alt=e.n;if(same)im.style.opacity=1}
+    set("#hn",e.n);set("#hs",e.s);set("#hd",e.q+". Nivel "+e.l.toLowerCase()+".");
+    if(badge)badge.textContent=e.c;
+    document.querySelectorAll(".sw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===p)));
+  }
+  document.querySelectorAll(".sw button").forEach(b=>b.onclick=()=>{if(b.dataset.p!==place)heroShow(b.dataset.p)});
+  const hb=$("#hb");if(hb)hb.onclick=()=>openEx(HF[place]);
+  if(im)heroShow("gym");
+  /* Tira de ejercicios */
+  const tk=$("#track");
+  if(tk){const n=EX.map(e=>e.n);tk.innerHTML=n.concat(n).map(x=>`<span>${esc(x)}</span>`).join("")}
+  /* Cifras con contador */
+  document.querySelectorAll("[data-count]").forEach(el=>{
+    const to=+el.dataset.count,suf=el.dataset.suffix||"";
+    if(RM||!to){el.textContent=to+suf;return}
+    const t0=performance.now(),d=1200;
+    const tick=n=>{const k=Math.min((n-t0)/d,1),v=Math.round(to*(1-Math.pow(1-k,3)));
+      el.textContent=v+suf;if(k<1)requestAnimationFrame(tick)};
+    requestAnimationFrame(tick);
+  });
+}
 const pg=document.body.dataset.page;
 if(pg==="all")list();if(pg==="gym")list("gym");if(pg==="home")list("casa");if(pg==="search")search();if(pg==="ai")ai();
+if(pg==="index")indexPage();
+scan();
